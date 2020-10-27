@@ -1,0 +1,5 @@
+<odoo>
+    <record id="hostadmin_admins" model="res.groups">
+        <field name="name">Hosting / Domainverwalter</field>
+    </record>
+</odoo>

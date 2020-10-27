@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hostadmin_domain_all,hostadmin.domain all,model_hostadmin_domain,,1,0,0,0
+access_hostadmin_hosting_all,hostadmin.hosting all,model_hostadmin_hosting,,1,0,0,0
+access_hostadmin_billing_all,hostadmin.billing all,model_hostadmin_billing,,1,0,0,0
+access_hostadmin_domain,hostadmin.domain,model_hostadmin_domain,hostadmin_admins,1,1,1,1
+access_hostadmin_hosting,hostadmin.hosting,model_hostadmin_hosting,hostadmin_admins,1,1,1,1
+access_hostadmin_billing,hostadmin.billing,model_hostadmin_billing,hostadmin_admins,1,1,1,1

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="hostadmin.hosting_tree">
+        <field name="name">hostadmin.hosting.tree</field>
+        <field name="model">hostadmin.hosting</field>
+        <field name="arch" type="xml">
+            <tree string="Hostings">
+                <field name="product_id"/>
+                <field name="price"/>
+                <field name="billing_date"/>
+                <field name="next_billing_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="hostadmin.domain_tree">
+        <field name="name">hostadmin.domain.tree</field>
+        <field name="model">hostadmin.domain</field>
+        <field name="arch" type="xml">
+            <tree string="Domainliste">
+                <field name="name"/>
+                <field name="next_billing_date"/>
+                <field name="customer_id"/>
+                <field name="admin"/>
+                <field name="hoster"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="hostadmin.domain_form">
+        <field name="name">hostadmin.domain.form</field>
+        <field name="model">hostadmin.domain</field>
+        <field name="priority" eval="16"/>
+        <field name="arch" type="xml">
+            <form string="Domain">
+                <header>
+                    <button string="Rechnung generieren" type="object" name="generate_invoice"/>
+                </header>
+                <sheet name="Domain">
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="customer_id"/>
+                        </group>
+                        <group>
+                            <field name="hoster"/>
+                            <field name="admin"/>
+                            <field name="next_billing_date"/>
+                        </group>
+                    </group>
+                    <field name="hostings" nolabel="1" widget="one2many_list" mode="tree">
+                        <tree string="Hostings" editable="bottom">
+                            <field name="product_id" domain="[('categ_id','=',3)]"/>
+                            <field name="list_price"/>
+                            <field name="price"/>
+                            <field name="billing_date"/>
+                            <field name="next_billing_date"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_hostadmin_domain_filter" model="ir.ui.view">
+        <field name="name">hostadmin.domain.select</field>
+        <field name="model">hostadmin.domain</field>
+        <field name="arch" type="xml">
+            <search string="Domainsuche">
+                <field name="name"/>
+                <filter name="my_hostamind_domains" domain="[('admin','=',uid)]" help="Meine Domains"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_customer_id" string="Kunde" context="{'group_by':'customer_id'}"/>
+                    <filter name="group_by_bearbeiter" string="Bearbeiter" context="{'group_by':'admin'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <!-- actions opening views on models -->
+    <record model="ir.actions.act_window" id="hostadmin.domain_action_window">
+        <field name="name">Domainverwaltung</field>
+        <field name="res_model">hostadmin.domain</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_hostadmin_domain_filter"/>
+    </record>
+
+    <record model="ir.actions.server" id="hostadmin.domain_gen_billing_server">
+        <field name="name">Rechnungen generieren</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="model_hostadmin_domain"/>
+        <field name="binding_model_id" ref="model_hostadmin_domain"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    action = records.generate_invoice()
+        </field>
+    </record>
+
+    <!-- Top menu item -->
+    <menuitem name="Hosting" id="hostadmin.menu_root" sequence="41"/>
+
+    <menuitem name="Domains" id="hostadmin.menu_domain_list" parent="hostadmin.menu_root"
+              action="hostadmin.domain_action_window"/>
+</odoo>
