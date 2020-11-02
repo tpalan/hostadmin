@@ -1,8 +1,7 @@
 from pprint import pprint
 
-from odoo import models, fields, api, _
-import calendar, datetime
-from odoo.exceptions import UserError
+from odoo import models, fields, api
+import datetime
 
 
 class AccountInvoiceLine(models.Model):
