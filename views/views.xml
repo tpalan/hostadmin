@@ -33,9 +33,6 @@
         <field name="priority" eval="16"/>
         <field name="arch" type="xml">
             <form string="Domain">
-                <header>
-                    <button string="Rechnung generieren" type="object" name="generate_invoice"/>
-                </header>
                 <sheet name="Domain">
                     <group>
                         <group>
@@ -95,8 +92,8 @@
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">
-if records:
-    action = records.generate_invoice()
+            if records:
+                action = records.generate_invoice()
         </field>
     </record>
 

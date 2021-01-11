@@ -97,34 +97,28 @@ class HostadminDomain(models.Model):
 
     def _prepare_invoice(self, domain):
 
-        # self.ensure_one()
-        # self = self.with_context(default_company_id=domain.customer_id.company_id.id,
-        #                         force_company=domain.customer_id.company_id.id)
-        # journal = self.env['account.move'].with_context(default_type='out_invoice')._get_default_journal()
-        # if not journal:
-        #    raise UserError(_('Please define an accounting sales journal for the company'))
-
         # get last day of month
         now = datetime.datetime.now()
-        # invoice_date = datetime.date(now.year, now.month, calendar.monthrange(now.year, now.month)[1])
         invoice_vals = {
-            # 'ref': '',
             'type': 'out_invoice',
-            # 'ref': 'Domain/Hostinggebühren',
             'partner_id': domain.customer_id.id,
-            # 'state': 'draft',
-            # 'company_id': domain.customer_id.company_id.id,
-            # 'journal_id': journal.id,  # company comes from the journal
-            # 'user_id': domain.customer_id.user_id.id,
-            # 'transaction_ids': [(6, 0, self.transaction_ids.ids)],
             'invoice_line_ids': [],
-            # 'date_invoice': invoice_date,
         }
+        section_name = 'Domain-/Hostinggebühren'
+        invoice_vals['invoice_line_ids'].append(
+            (0, None, {
+                'display_type': 'line_section',
+                'name': section_name,
+                'product_id': None,
+                'product_uom_id': None,
+                'quantity': 0,
+                'discount': 0,
+                'price_unit': 0,
+                'account_id': False
+            }))
         return invoice_vals
 
     def generate_invoice(self):
-        account_revenue = self.env['account.account'].search(
-            [('user_type_id', '=', self.env.ref('account.data_account_type_revenue').id)], limit=1)
 
         lang_obj = self.env['res.lang']
 
@@ -220,8 +214,29 @@ class HostadminDomain(models.Model):
             invoice_vals_list.append(invoice_vals)
         pprint(invoice_vals_list)
         invoices = self.env['account.move'].create(invoice_vals_list)
-        # relink hostadmin billing objects
+
+        # relink hostadmin billing objects and get invoice ids
+        invoice_ids = []
         for invoice in invoices:
             for invoice_line in invoice.invoice_line_ids:
                 billing_object = invoice_line.hostadmin_billing_id
                 billing_object.invoice_line = invoice_line.id
+            invoice_ids.append(invoice.id)
+
+        # open the invoice list with a filter set
+        action_vals = {
+            'name': 'neue Rechnungen ',
+            'domain': [('id', 'in', invoice_ids)],
+            'res_model': 'account.move',
+            'views': [[False, "tree"], [False, "form"]],
+            'type': 'ir.actions.act_window',
+            'context': self._context
+        }
+
+        if len(invoice_ids) == 1:
+            # why does this not work?
+            action_vals.update({'res_id': invoice_ids[0], 'view_mode': 'form'})
+        else:
+            action_vals['view_mode'] = 'tree,form'
+
+        return action_vals
